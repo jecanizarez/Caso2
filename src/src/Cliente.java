@@ -34,7 +34,7 @@ public class Cliente {
 		
 		BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
 		
-		ProtocoloCliente.procesar(stdIn, lector, escritor);
+		ProtocoloCliente.protocoloInicio(stdIn, lector, escritor);
 		
 		escritor.close();
 		lector.close();
