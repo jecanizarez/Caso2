@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.security.cert.X509Certificate;
+import java.security.spec.X509EncodedKeySpec;
 
 public class Cliente {
 	
@@ -40,6 +42,7 @@ public class Cliente {
 		lector.close();
 		socket.close();
 		stdIn.close();
+		
 	}
 
 }

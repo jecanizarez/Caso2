@@ -1,8 +1,14 @@
 package src;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Random;
 
 import javax.xml.bind.DatatypeConverter;
@@ -44,7 +50,7 @@ public class ProtocoloCliente {
 	}
 
 
-	public static void protocoloInicio(BufferedReader stdIn, BufferedReader pIn, PrintWriter pOut) throws IOException
+	public static void protocoloInicio(BufferedReader stdIn, BufferedReader pIn, PrintWriter pOut) throws IOException, CertificateException
 	{
 
 		pOut.println("HOLA");
@@ -65,11 +71,18 @@ public class ProtocoloCliente {
 			pOut.close();
 			System.exit(-1);
 		}
-        String algoritmos = seleccionarAlgoritmos();
+		String algoritmos = seleccionarAlgoritmos();
 		pOut.println(algoritmos);
-		byte[] certificadoEncoded = DatatypeConverter.parseBase64Binary(pIn.readLine());
-		
-		
+		byte[] certificadoServidorBytes = DatatypeConverter.parseBase64Binary(pIn.readLine());
+		CertificateFactory creator = CertificateFactory.getInstance("X.509");
+		InputStream in = new ByteArrayInputStream(certificadoServidorBytes);
+		X509Certificate certificado = (X509Certificate) creator.generateCertificate(in);
+		certificado.checkValidity();
+		System.out.println("Certificado válido");
+
+
+
+
 	}
 
 	public static String seleccionarAlgoritmos() 
@@ -95,12 +108,12 @@ public class ProtocoloCliente {
 		algoritmosIntegridad[0] = HMACSHA256;
 		algoritmosIntegridad[0] = HMACSHA384;
 		algoritmosIntegridad[0] = HMACSHA512;
-		
+
 		num = numberGenerator.nextInt(5); 	
-		
+
 		retorno = retorno + algoritmosIntegridad[num];
-		
-		
+
+
 		return retorno;
 	}
 
