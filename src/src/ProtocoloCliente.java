@@ -50,63 +50,78 @@ public class ProtocoloCliente {
 
 	private static SecretKey llaveSesion;
 
-
-
-
-
-
-	public static void procesar(BufferedReader stdIn, BufferedReader pIn, PrintWriter pOut) throws IOException
-	{
-		String palabra = stdIn.readLine();
-		pOut.println(palabra);
-
-		String respuesta = pIn.readLine();
-		if(respuesta.equals("OK"))
-		{
-			System.out.println("Recibi un OK");
-		}
-	}
-
-
+/**
+ * Metodo que contiene todo el protocolo de comunicación con el servidor
+ * @param stdIn
+ * @param pIn
+ * @param pOut
+ * @throws IOException
+ * @throws CertificateException
+ * @throws NoSuchAlgorithmException
+ * @throws NoSuchPaddingException
+ * @throws InvalidKeyException
+ */
 	public static void protocoloInicio(BufferedReader stdIn, BufferedReader pIn, PrintWriter pOut) throws IOException, CertificateException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException
 	{
-
+        //Se envia la palabra necesaria para iniciar el protocolo con el servidor
 		pOut.println("HOLA");
-
+		
+        //Se verifica la respuesta del servidor
 		verificarRespuesta(stdIn, pIn, pOut, pIn.readLine());
 
+		//Se seleccionas los algoritmos que se van usar durante la comunicacion con el servidor aleatoriamente.
 		String algoritmos = seleccionarAlgoritmos();
 		System.out.println("El cliente esta enviando los algoritmos seleccionados: " + algoritmos);
+		
+		//Se envian los algoritmos al servidor
 		pOut.println(algoritmos);
-
+        //Se verifica la respuesta del servidor
 		verificarRespuesta(stdIn, pIn, pOut, pIn.readLine());
-
+		
+        //Se recibe el certificado del servidor
 		byte[] certificadoServidorBytes = DatatypeConverter.parseBase64Binary(pIn.readLine());
 		CertificateFactory creator = CertificateFactory.getInstance("X.509");
 		InputStream in = new ByteArrayInputStream(certificadoServidorBytes);
 		X509Certificate certificado = (X509Certificate) creator.generateCertificate(in);
+		
+		//Se verifica que el certificado del servidor sea valido
 		certificado.checkValidity();
 		System.out.println("El certificado enviado por el cervidor es valido");
-
+        
+		//Se guarda la llave publica del cervidor
 		llavePublicaServidor = certificado.getPublicKey();
+
+		//Se genera la llave de sesion.
 		llaveSesion = generarLlaveSesion();
+		
+		//Se cifra la llave de sesion con la llave publica del servidor
 		byte[] llaveSesionBytes = llaveSesion.getEncoded();
 		byte[] llaveSesionEncriptada = cifrarAsimetrico(llavePublicaServidor, llaveSesionBytes);
 		String llaveSesionEncriptadaString = DatatypeConverter.printBase64Binary(llaveSesionEncriptada);
+		
+		//Se envia la llave cifrada al servidor
 		pOut.println(llaveSesionEncriptadaString);
 		System.out.println("Se envió la llave de sesion");
 		
 		System.out.println("Digite el reto");
 		String reto = stdIn.readLine();
+		//Se verifica la longitud del reto
 		reto = verificarLongitud(reto);
+		
+		//Se envia el reto al servidor
 		pOut.println(reto);
 		System.out.println("Se envio el reto");
 		
+		//Se lee el reto cifrado por la llave de sesion
 		String retoCifrado = pIn.readLine();
 		byte[] retoCifradoBytes =  DatatypeConverter.parseBase64Binary(retoCifrado);
+		
+		//Se descifra el reto
 		byte[] retoDescifrado = descifrarSimetrico(llaveSesion,retoCifradoBytes);
 		String respuestaServidor = DatatypeConverter.printBase64Binary(retoDescifrado);
 		String respuesta = "";
+		
+		//Se verifica que el reto digitado por el usuario y el enviado encriptado por el servidor coincidan. Esto con el fin de probrar que la llave simetrica funcione
 		if(respuestaServidor.equals(reto))
 		{
 			respuesta = "OK";
@@ -115,47 +130,62 @@ public class ProtocoloCliente {
 		{
 			respuesta = "ERROR";
 		}
+		//Se envia la respuesta al servidor
 		pOut.println(respuesta);
 		
 		
 		System.out.println("Digite su documento");
+		//Se lee el documento del usuario
 		String documento = stdIn.readLine();
+		
+		//Se verifica la longitud del documento
 		documento = verificarLongitud(documento);
 		byte[] documentoBytes = DatatypeConverter.parseBase64Binary(documento);
 		byte[] documentoCifrada = cifrarSimetrico(llaveSesion, documentoBytes);
+		//Se encripta con la llave de sesion
 		String documentoCifradaString = DatatypeConverter.printBase64Binary(documentoCifrada);
+		
+		//Se envia al servidor
 		pOut.println(documentoCifradaString);
 		System.out.println("Documento enviado");
 		
 		System.out.println("Digite su contraseña");
+		//Sw lee el cvv del usuario
 		String contraseña = stdIn.readLine();
 		contraseña = verificarLongitud(contraseña);
 		byte[] contraseñaBytes = DatatypeConverter.parseBase64Binary(contraseña);
+		
+		//Se cifra el cvv con la llave de sesion
 		byte[] contraseñaCifrada = cifrarSimetrico(llaveSesion, contraseñaBytes);
 		String contraseñaCifradaString = DatatypeConverter.printBase64Binary(contraseñaCifrada);
+		
+		//Se envia al serviddor
 		pOut.println(contraseñaCifradaString);
 		System.out.println("contraseña enviada");
 		
 		
+		//Se recibe el valor enviado por el servidor se descifra con la llave de sesion
 		String valor = pIn.readLine(); 
-		System.out.println("Recibo el valor sifrado con la llave de sesion");
+		System.out.println("Recibo el valor cifrado con la llave de sesion");
 		byte[] valorBytes = DatatypeConverter.parseBase64Binary(valor);
 		byte[] valorDescifrado = descifrarSimetrico(llaveSesion, valorBytes);
+		String valorDescifradoString =   DatatypeConverter.printBase64Binary(valorDescifrado);
+		System.out.println("El valor descifrado es:" + valorDescifradoString);
 		
-		
-		
+		//Se recibe el valor del servidor se descifra con la llave publica para obtener el Hmac
 		String valorServidor = pIn.readLine(); 
 		System.out.println("Recibo el hmac cifrado con la privada del servidor");
 		byte[] valorServidorBytes = DatatypeConverter.parseBase64Binary(valorServidor);
 		byte[] valorServidorHMAC = descifrarAsimetrico(llavePublicaServidor, valorServidorBytes);
 		
+		//Se genera el HMAC  del valor que envio previamente el servidor
 		Mac cifradorMAC = Mac.getInstance(algIntegridadSeleccionado);
 		cifradorMAC.init(llaveSesion);
 		byte[] valorHmac = cifradorMAC.doFinal(valorDescifrado);
 
 
 		
-		
+		//Se verifican que los Hmac coincidan
 		if(Arrays.equals(valorHmac, valorServidorHMAC))
 		{
 			System.out.println("El codigo de autenticación de los valores coincide, el valor no ha sido modificado");
@@ -166,8 +196,15 @@ public class ProtocoloCliente {
 			System.out.println("No coincide");
 			respuesta = "ERROR";
 		}
+		//Se envia la respuesta al servidor
 		pOut.println(respuesta);
 		System.out.println("La conexión ha terminado");
+		
+		//Se cierra la conexion
+		stdIn.close();
+		pIn.close();
+		pOut.close();
+		System.exit(-1);
 		
 		
 		
@@ -213,6 +250,14 @@ public class ProtocoloCliente {
 
 		return retorno;
 	}
+	/**
+	 * Metodo para verificar la respuesta del servidor. En caso de que esta sea de ERROR se cierra la comunicación y se detiene el programa.
+	 * @param stdIn
+	 * @param pIn
+	 * @param pOut
+	 * @param respuesta
+	 * @throws IOException
+	 */
 	public static void verificarRespuesta(BufferedReader stdIn, BufferedReader pIn, PrintWriter pOut, String respuesta) throws IOException
 	{
 
@@ -233,6 +278,11 @@ public class ProtocoloCliente {
 			System.exit(-1);
 		}
 	}
+	/**
+	 * Metodo para generar la llave simetrica de sesión para poder comunicarse con el servidor
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 */
 	public static SecretKey generarLlaveSesion() throws NoSuchAlgorithmException
 	{
 		KeyGenerator keyGenerator = KeyGenerator.getInstance(algSimetricoSeleccionado);
@@ -256,7 +306,12 @@ public class ProtocoloCliente {
 
 		return keyGenerator.generateKey();
 	}
-
+/**
+ * Metodo para cifrar con la llave de sesión de la comunicación
+ * @param llave
+ * @param texto
+ * @return
+ */
 	public static byte[] cifrarSimetrico(SecretKey llave, byte[] texto)
 	{
 		byte[] textoCifrado;
@@ -275,6 +330,13 @@ public class ProtocoloCliente {
 		}
 	}
 
+	
+	/**
+	 * Metodo para descifrar con la llave de sesión durante el protocolo de comunicacion
+	 * @param llave
+	 * @param texto
+	 * @return
+	 */
 	public static byte[] descifrarSimetrico(SecretKey llave, byte[] texto)
 	{
 		byte[] textoClaro;
@@ -292,7 +354,12 @@ public class ProtocoloCliente {
 		}
 		return textoClaro;
 	}
-	
+	/**
+	 * Metodo para cifrar con llaves publicas o privadas para el protocolo de comunicacion con el servidor
+	 * @param llave
+	 * @param texto
+	 * @return
+	 */
 	public static byte[] cifrarAsimetrico(Key llave, byte[] texto)
 	{
 		byte[] textoCifrado;
@@ -329,6 +396,11 @@ public class ProtocoloCliente {
 		return textoClaro;
 	}
 	
+	/**
+	 * Metodo para verificar la longitud de las palabras que se necesitan enviar al servidor. Se verifica que su longitud sea un multiplo de 4.
+	 * @param palabra
+	 * @return
+	 */
 	public static String verificarLongitud(String palabra)
 	{
 		  while(palabra.length()%4 != 0)
