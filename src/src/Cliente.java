@@ -28,8 +28,8 @@ public class Cliente {
 		
 		try
 		{
+			//Se crean el socket y el B
 			socket = new Socket(SERVIDOR, PUERTO);
-			
 			escritor = new PrintWriter(socket.getOutputStream(), true);
 			lector = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		}
