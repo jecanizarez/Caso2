@@ -13,12 +13,14 @@ import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.NoSuchPaddingException;
 
-public class Cliente {
+import uniandes.gload.core.Task;
+
+public class Cliente  extends Task{
 	
 	public final static int PUERTO = 3400;
 	public static final String SERVIDOR = "localhost";
 	
-	public static void main(String args[]) throws IOException, CertificateException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException
+	public void execute()
 	{
 		Socket socket = null;
 		PrintWriter escritor = null;
@@ -28,7 +30,6 @@ public class Cliente {
 		
 		try
 		{
-			//Se crean el socket y el B
 			socket = new Socket(SERVIDOR, PUERTO);
 			escritor = new PrintWriter(socket.getOutputStream(), true);
 			lector = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -41,13 +42,30 @@ public class Cliente {
 		
 		BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
 		
-		ProtocoloCliente.protocoloInicio(stdIn, lector, escritor);
+		try {
+			ProtocoloCliente.protocoloInicio(stdIn, lector, escritor);
+			escritor.close();
+			lector.close();
+			socket.close();
+			stdIn.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
 		
-		escritor.close();
-		lector.close();
-		socket.close();
-		stdIn.close();
 		
 	}
+	@Override
+	public void fail() {
+		System.out.println(Task.MENSAJE_FAIL);
+	}
+
+	@Override
+	public void success() {
+		System.out.println(Task.OK_MESSAGE);
+	}
+	
+	
+		
+	
 
 }
