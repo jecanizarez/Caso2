@@ -197,11 +197,7 @@ public class ProtocoloCliente {
 		pOut.println(respuesta);
 		System.out.println("La conexión ha terminado");
 		
-		//Se cierra la conexion
-		stdIn.close();
-		pIn.close();
-		pOut.close();
-		System.exit(0);
+
 		
 		
 		

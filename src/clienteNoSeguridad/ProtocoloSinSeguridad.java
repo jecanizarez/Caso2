@@ -95,13 +95,11 @@ public class ProtocoloSinSeguridad {
 		//Se genera la llave de sesion.
 		llaveSesion = generarLlaveSesion();
 		
-		//Se cifra la llave de sesion con la llave publica del servidor
 		byte[] llaveSesionBytes = llaveSesion.getEncoded();
-		byte[] llaveSesionEncriptada = cifrarAsimetrico(llavePublicaServidor, llaveSesionBytes);
-		String llaveSesionEncriptadaString = DatatypeConverter.printBase64Binary(llaveSesionEncriptada);
 		
-		//Se envia la llave cifrada al servidor
-		pOut.println(llaveSesionEncriptadaString);
+		
+		//Se envia la llave  al servidor
+		pOut.println(llaveSesionBytes);
 		System.out.println("Se envió la llave de sesion");
 		
 
@@ -144,7 +142,7 @@ public class ProtocoloSinSeguridad {
 		System.out.println("contraseña enviada");
 		
 		
-		//Se recibe el valor enviado por el servidor se descifra con la llave de sesion
+		//Se recibe el valor enviado por el servidor 
 		String valor = pIn.readLine(); 
 		
 		
@@ -153,7 +151,7 @@ public class ProtocoloSinSeguridad {
 		
 		//Se recibe el valor del servidor se descifra con la llave publica para obtener el Hmac
 		String valorServidor = pIn.readLine(); 
-        byte[] hashValor = valorServidor.getBytes();
+        byte[] hashValor = DatatypeConverter.parseBase64Binary(valorServidor);
 
 
 		
@@ -260,103 +258,7 @@ public class ProtocoloSinSeguridad {
  * @param texto
  * @return
  */
-	public static byte[] cifrarSimetrico(SecretKey llave, byte[] texto)
-	{
-		byte[] textoCifrado;
-		try
-		{
-			Cipher cifrador = Cipher.getInstance(algSimetricoSeleccionado);
-			cifrador.init(Cipher.ENCRYPT_MODE, llave);
-			textoCifrado = cifrador.doFinal(texto);
-			return textoCifrado;
-		}
-		catch(Exception e)
-		{
-			System.out.println("Ocurrio un error al cifrar el mensaje");
-			System.exit(-1);
-			return null;
-		}
-	}
-
 	
-	/**
-	 * Metodo para descifrar con la llave de sesión durante el protocolo de comunicacion
-	 * @param llave
-	 * @param texto
-	 * @return
-	 */
-	public static byte[] descifrarSimetrico(SecretKey llave, byte[] texto)
-	{
-		byte[] textoClaro;
-		try
-		{
-			Cipher descifrador = Cipher.getInstance(algSimetricoSeleccionado);
-			descifrador.init(Cipher.DECRYPT_MODE, llave);
-			textoClaro = descifrador.doFinal(texto);
-		}
-		catch(Exception e)
-		{
-			System.out.println("Ocurrio un error al descifrar el mensaje");
-			System.exit(-1);
-			return null;
-		}
-		return textoClaro;
-	}
-	/**
-	 * Metodo para cifrar con llaves publicas o privadas para el protocolo de comunicacion con el servidor
-	 * @param llave
-	 * @param texto
-	 * @return
-	 */
-	public static byte[] cifrarAsimetrico(Key llave, byte[] texto)
-	{
-		byte[] textoCifrado;
-		try
-		{
-			Cipher cifrador = Cipher.getInstance(RSA);
-			cifrador.init(Cipher.ENCRYPT_MODE, llave);
-			textoCifrado = cifrador.doFinal(texto);
-			return textoCifrado;
-		}
-		catch(Exception e)
-		{
-			System.out.println("Ocurrio un error al cifrar el mensaje");
-			System.exit(-1);
-			return null;
-		}
-	}
-	
-	public static byte[] descifrarAsimetrico(Key llave, byte[] texto)
-	{
-		byte[] textoClaro;
-		try
-		{
-			Cipher descifrador = Cipher.getInstance(RSA);
-			descifrador.init(Cipher.DECRYPT_MODE, llave);
-			textoClaro = descifrador.doFinal(texto);
-		}
-		catch(Exception e)
-		{
-			System.out.println("Ocurrio un error al descifrar el mensaje");
-			System.exit(-1);
-			return null;
-		}
-		return textoClaro;
-	}
-	
-	/**
-	 * Metodo para verificar la longitud de las palabras que se necesitan enviar al servidor. Se verifica que su longitud sea un multiplo de 4.
-	 * @param palabra
-	 * @return
-	 */
-	public static String verificarLongitud(String palabra)
-	{
-		  while(palabra.length()%4 != 0)
-		    {
-		    	palabra += "0";
-		    }
-		  return palabra;
-	}
 
 }
 

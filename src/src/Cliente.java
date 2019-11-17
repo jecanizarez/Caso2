@@ -30,28 +30,22 @@ public class Cliente  extends Task{
 		
 		try
 		{
+			BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
 			socket = new Socket(SERVIDOR, PUERTO);
 			escritor = new PrintWriter(socket.getOutputStream(), true);
 			lector = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		}
-		catch (IOException e)
-		{
-			System.err.println("Exception: " + e.getMessage());
-			System.exit(1);
-		}
-		
-		BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-		
-		try {
 			ProtocoloCliente.protocoloInicio(stdIn, lector, escritor);
 			escritor.close();
 			lector.close();
 			socket.close();
 			stdIn.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} 
-		
+		}
+		catch (IOException | InvalidKeyException | CertificateException | NoSuchAlgorithmException | NoSuchPaddingException e)
+		{
+			System.err.println("Exception: " + e.getMessage());
+			System.exit(1);
+		}
+				
 		
 	}
 	@Override
