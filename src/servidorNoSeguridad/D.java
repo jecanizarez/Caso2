@@ -38,6 +38,9 @@ public class D extends Thread {
 	private static X509Certificate certSer;
 	private static KeyPair keyPairServidor;
 	
+	//id Thread
+	private int idThread;
+	
 	//Buffer para escribir los resultados
 	BufferedWriter buffer;
 	public static void init(X509Certificate pCertSer, KeyPair pKeyPairServidor, File pFile) {
@@ -48,7 +51,8 @@ public class D extends Thread {
 	
 	public D (Socket csP, int idP, String prueba) throws IOException {
 		
-		buffer = new BufferedWriter(new FileWriter("Prueba" +idP + prueba+".csv",true));
+		buffer = new BufferedWriter(new FileWriter("Prueba" +prueba+".csv",true));
+		idThread = idP;
 		
 		sc = csP;
 		dlg = new String("delegado " + idP + ": ");
@@ -190,14 +194,14 @@ public class D extends Thread {
 		        
 				MessageDigest messageDigest = MessageDigest.getInstance("SHA-512");
 				byte[] be = messageDigest.digest( strvalor.getBytes() );
-				ac.println(be);	
+				ac.println(toHexString(be));	
 				System.out.println(dlg + "envio hmac cifrado con llave privada del servidor. continuado.");
 				
 				long tiempoFinal = System.nanoTime();
 				long tiempoTotal = tiempoFinal -tiempoInicio;
 				String tiempoString = tiempoTotal +";" + System.nanoTime();
 				buffer.newLine();
-				buffer.write(tiempoString);
+				buffer.write(  idThread +";" +tiempoString);
 				buffer.close();
 				
 				cadenas[7] = "";

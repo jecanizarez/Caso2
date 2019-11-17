@@ -37,6 +37,9 @@ public class D extends Thread {
 	private static X509Certificate certSer;
 	private static KeyPair keyPairServidor;
 	
+	//Id thread 
+	private int idThread; 
+	
 	//Buffer para escribir los resultados
 	BufferedWriter buffer;
 	public static void init(X509Certificate pCertSer, KeyPair pKeyPairServidor, File pFile) {
@@ -47,10 +50,11 @@ public class D extends Thread {
 	
 	public D (Socket csP, int idP, String prueba) throws IOException {
 		
-		buffer = new BufferedWriter(new FileWriter("Prueba" +idP + prueba+".csv",true));
+		buffer = new BufferedWriter(new FileWriter("Prueba" +prueba+".csv",true));
 		
 		sc = csP;
 		dlg = new String("delegado " + idP + ": ");
+		idThread = idP; 
 		try {
 		mybyte = new byte[520]; 
 		mybyte = certSer.getEncoded();
@@ -208,8 +212,9 @@ public class D extends Thread {
 				long tiempoFinal = System.nanoTime();
 				long tiempoTotal = tiempoFinal -tiempoInicio;
 				String tiempoString = tiempoTotal +";" + System.nanoTime();
+				
 				buffer.newLine();
-				buffer.write(tiempoString);
+				buffer.write(   idThread +";" +tiempoString);
 				buffer.close();
 				
 				cadenas[7] = "";

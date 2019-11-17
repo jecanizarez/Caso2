@@ -18,7 +18,7 @@ public class MonitorServidor  extends Thread{
 	
 	public MonitorServidor(String prueba) throws IOException
 	{
-		logW = new BufferedWriter(new FileWriter("Prueba" + prueba +".csv",false));
+		logW = new BufferedWriter(new FileWriter("Monitor" + prueba +".csv",false));
 	}
 	
 	

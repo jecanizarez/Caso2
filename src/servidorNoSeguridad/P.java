@@ -75,7 +75,7 @@ public class P {
 					monitor.start();
 					listo = true ;
 				}
-				ex.submit(new D(sc, idThread, prueba));
+				ex.execute(new D(sc, idThread, prueba));
 				idThread++;
 
 			} catch (IOException e) {

@@ -201,7 +201,7 @@ public class ProtocoloCliente {
 		stdIn.close();
 		pIn.close();
 		pOut.close();
-		System.exit(-1);
+		System.exit(0);
 		
 		
 		

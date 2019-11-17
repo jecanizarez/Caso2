@@ -4,5 +4,5 @@ delegado 0: envio certificado del servidor. continuando.
 delegado 0: recibio y creo llave simetrica. continuando.
 delegado 0: recibio confirmacion del cliente:OK-continuado.
 delegado 0: recibio cc y clave - continuando
-delegado 0: envio valor 22829100 cifrado con llave simetrica al cliente. continuado.
+delegado 0: envio valor 90786500 cifrado con llave simetrica al cliente. continuado.
 delegado 0: Terminando exitosamente.OK

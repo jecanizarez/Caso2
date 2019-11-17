@@ -5,6 +5,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+
+import javax.crypto.NoSuchPaddingException;
 
 import src.ProtocoloCliente;
 import uniandes.gload.core.Task;
@@ -24,27 +29,20 @@ public class clienteNoSeguridad extends Task{
 		
 		try
 		{
+			BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
 			socket = new Socket(SERVIDOR, PUERTO);
 			escritor = new PrintWriter(socket.getOutputStream(), true);
 			lector = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		}
-		catch (IOException e)
-		{
-			System.err.println("Exception: " + e.getMessage());
-			System.exit(1);
-		}
-		
-		BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-		
-		try {
 			ProtocoloSinSeguridad.protocoloInicio(stdIn, lector, escritor);
 			escritor.close();
 			lector.close();
 			socket.close();
-			stdIn.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} 
+		}
+		catch (IOException | InvalidKeyException | CertificateException | NoSuchAlgorithmException | NoSuchPaddingException e)
+		{
+			System.err.println("Exception: " + e.getMessage());
+			System.exit(1);
+		}
 		
 		
 	}

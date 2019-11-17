@@ -104,10 +104,9 @@ public class ProtocoloSinSeguridad {
 		pOut.println(llaveSesionEncriptadaString);
 		System.out.println("Se envió la llave de sesion");
 		
-		System.out.println("Digite el reto");
-		String reto = stdIn.readLine();
+
+		String reto = "1234";
 		//Se verifica la longitud del reto
-		reto = verificarLongitud(reto);
 		
 		//Se envia el reto al servidor
 		pOut.println(reto);
@@ -129,18 +128,16 @@ public class ProtocoloSinSeguridad {
 		//Se envia la respuesta al servidor
 		pOut.println(respuesta);
 		
-		
-		System.out.println("Digite su documento");
+
 		//Se lee el documento del usuario
-		String documento = stdIn.readLine();
-		
+		String documento = "1234";
 		//Se envia al servidor
 		pOut.println(documento);
 		System.out.println("Documento enviado");
 		
-		System.out.println("Digite su contraseña");
+		
 		//Sw lee el cvv del usuario
-		String contraseña = stdIn.readLine();
+		String contraseña = "1234";
 		
 		//Se envia al serviddor
 		pOut.println(contraseña);
@@ -176,10 +173,7 @@ public class ProtocoloSinSeguridad {
 		System.out.println("La conexión ha terminado");
 		
 		//Se cierra la conexion
-		stdIn.close();
-		pIn.close();
-		pOut.close();
-		System.exit(-1);
+
 		
 		
 		
@@ -196,31 +190,10 @@ public class ProtocoloSinSeguridad {
 
 	public static String seleccionarAlgoritmos() 
 	{
+		String retorno = "ALGORITMOS:RC4:RSA:HMACSHA384";
 
-		String retorno = "ALGORITMOS:";
-
-		String[] algoritmosSimetricos = new String[4];
-		algoritmosSimetricos[1] = DES;
-		algoritmosSimetricos[2] = AES;
-		algoritmosSimetricos[3] = RC4;
-
-		Random numberGenerator = new Random();
-		int num = numberGenerator.nextInt(3) + 1; 
-
-		algSimetricoSeleccionado = algoritmosSimetricos[num];
-		retorno = retorno + algoritmosSimetricos[num] + ":" + RSA + ":";
-
-
-		String[] algoritmosIntegridad = new String[5];
-		algoritmosIntegridad[0] = HMACMD5;
-		algoritmosIntegridad[1] = HMACSHA1;
-		algoritmosIntegridad[2] = HMACSHA256;
-		algoritmosIntegridad[3] = HMACSHA384;
-		algoritmosIntegridad[4] = HMACSHA512;
-
-		num = numberGenerator.nextInt(5); 	
-        algIntegridadSeleccionado = algoritmosIntegridad[num];
-		retorno = retorno + algoritmosIntegridad[num];
+		algSimetricoSeleccionado = RC4;
+		algIntegridadSeleccionado = HMACSHA384;
 
 
 		return retorno;
